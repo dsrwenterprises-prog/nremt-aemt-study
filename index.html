@@ -1,0 +1,169 @@
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>NREMT AEMT Study App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: #e5e7eb;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        .card {
+            background: #111827;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        .choice {
+            background: #1f2933;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 10px;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .choice:hover {
+            border-color: #3b82f6;
+        }
+        .correct { border-color: #22c55e; }
+        .incorrect { border-color: #ef4444; }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            background: #3b82f6;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover { background: #2563eb; }
+        .dashboard {
+            margin-top: 30px;
+            padding: 15px;
+            background: #020617;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>NREMT AEMT Study App</h1>
+
+        <div id="quiz" class="card"></div>
+
+        <div id="feedback" class="card" style="display:none"></div>
+
+        <button id="nextBtn" onclick="nextQuestion()">Next Question</button>
+
+        <div id="dashboard" class="dashboard"></div>
+    </div>
+
+<script>
+// =======================
+// SAMPLE QUESTION BANK
+// =======================
+const questions = [
+    {
+        id: 1,
+        domain: "Airway",
+        question: "A COPD patient is in severe respiratory distress. What is the best initial intervention?",
+        choices: ["Intubate", "CPAP", "NRB", "Albuterol only"],
+        correct: 1,
+        explanation: "CPAP reduces work of breathing and improves oxygenation in COPD exacerbations."
+    },
+    {
+        id: 2,
+        domain: "Cardiology",
+        question: "A patient with HR 38, hypotension, and AMS. Best treatment?",
+        choices: ["Atropine", "Dopamine", "TCP", "Fluids"],
+        correct: 2,
+        explanation: "Unstable bradycardia requires immediate transcutaneous pacing."
+    }
+];
+
+let scores = {};
+let currentQuestion = null;
+
+// =======================
+// CORE LOGIC
+// =======================
+function pickQuestion() {
+    const weakDomains = Object.keys(scores).filter(d => scores[d].correct / scores[d].total < 0.7);
+    const pool = weakDomains.length
+        ? questions.filter(q => weakDomains.includes(q.domain))
+        : questions;
+    return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function nextQuestion() {
+    document.getElementById("feedback").style.display = "none";
+    currentQuestion = pickQuestion();
+
+    const quiz = document.getElementById("quiz");
+    quiz.innerHTML = `<h2>${currentQuestion.question}</h2>`;
+
+    currentQuestion.choices.forEach((choice, index) => {
+        const div = document.createElement("div");
+        div.className = "choice";
+        div.textContent = choice;
+        div.onclick = () => submitAnswer(index, div);
+        quiz.appendChild(div);
+    });
+}
+
+function submitAnswer(index, element) {
+    const correct = index === currentQuestion.correct;
+
+    if (!scores[currentQuestion.domain]) {
+        scores[currentQuestion.domain] = { correct: 0, total: 0 };
+    }
+
+    scores[currentQuestion.domain].total++;
+    if (correct) scores[currentQuestion.domain].correct++;
+
+    element.classList.add(correct ? "correct" : "incorrect");
+
+    const feedback = document.getElementById("feedback");
+    feedback.style.display = "block";
+    feedback.innerHTML = `
+        <h3>${correct ? "Correct" : "Incorrect"}</h3>
+        <p>${currentQuestion.explanation}</p>
+    `;
+
+    updateDashboard();
+}
+
+function updateDashboard() {
+    const dash = document.getElementById("dashboard");
+    dash.innerHTML = "<h3>Weakness Dashboard</h3>";
+
+    for (const domain in scores) {
+        const s = scores[domain];
+        const percent = Math.round((s.correct / s.total) * 100);
+        const status = percent >= 80 ? "Strong" : percent >= 70 ? "Borderline" : "Weak";
+
+        dash.innerHTML += `<p><strong>${domain}:</strong> ${percent}% (${status})</p>`;
+    }
+}
+
+// Start app
+nextQuestion();
+</script>
+</body>
+</html>
+
+
