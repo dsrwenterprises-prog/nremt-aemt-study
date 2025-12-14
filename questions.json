@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "category": "Airway",
+    "question": "What is the preferred method of airway management in a patient with respiratory distress?",
+    "options": ["Bag-valve mask", "Endotracheal intubation", "CPAP", "Oxygen via nasal cannula"],
+    "answer": 1
+  },
+  {
+    "id": 2,
+    "category": "Cardiology",
+    "question": "Which rhythm requires immediate defibrillation?",
+    "options": ["Asystole", "Ventricular fibrillation", "Atrial fibrillation", "Sinus bradycardia"],
+    "answer": 1
+  }
+]
